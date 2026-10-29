@@ -5,22 +5,17 @@ import { site } from '../site.config';
 <Base title="Contact">
   <div class="page">
     <h1>Contact</h1>
-    <p class="contact-lead">撮影のご依頼・お見積もりなど、お気軽にご連絡ください。</p>
+    <p class="contact-lead">撮影のご依頼・お見積もりなど、お気軽にご連絡ください。<br />メールまたは Instagram の DM で受け付けています。</p>
 
-    <!-- 送信先は site.config.ts の formEndpoint（Formspree） -->
-    <form class="contact-form" action={site.formEndpoint} method="POST">
-      <label>お名前
-        <input type="text" name="name" autocomplete="name" required />
-      </label>
-      <label>メールアドレス
-        <input type="email" name="email" autocomplete="email" required />
-      </label>
-      <label>内容
-        <textarea name="message" required></textarea>
-      </label>
-      <!-- スパム対策（人間には見えない欄） -->
-      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
-      <button type="submit">送信する</button>
-    </form>
+    <dl class="contact-list">
+      <div>
+        <dt>Mail</dt>
+        <dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
+      </div>
+      <div>
+        <dt>Instagram</dt>
+        <dd><a href={site.instagram} target="_blank" rel="noopener">@{site.instagramId}</a></dd>
+      </div>
+    </dl>
   </div>
 </Base>
