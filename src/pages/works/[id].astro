@@ -21,7 +21,7 @@ export async function getStaticPaths() {
 
 const { work, prev, next, related } = Astro.props;
 const { Content } = await render(work);
-const { title, date, summary, links, layout } = work.data;
+const { title, date, summary, links, layout, perRow, rows: rowPattern } = work.data;
 const photos = photosOf(work.id);
 
 // 2列表示：ファイル名順に、その時点で短いほうの列へ1枚ずつ振り分ける
@@ -33,6 +33,21 @@ photos.forEach((photo, index) => {
   columns[c].push({ photo, index });
   heights[c] += photo.image.height / photo.image.width;
 });
+
+// 段組み表示（rows）：1段に perRow 枚ずつ（rows を指定した場合はその枚数で）区切る
+// 各段は高さが揃い、横幅いっぱいに広がる。端数の段も横幅いっぱいになる（例: 3枚+3枚+2枚）
+// スマホでは1段2枚（perRow が 1 のときは1枚）で組み直したものを別に用意し、CSSで切り替える
+const chunk = (sizeOf: (r: number) => number) => {
+  const groups: { photo: Photo; index: number }[][] = [];
+  for (let i = 0, r = 0; i < photos.length; r++) {
+    const n = sizeOf(r);
+    groups.push(photos.slice(i, i + n).map((photo, k) => ({ photo, index: i + k })));
+    i += n;
+  }
+  return groups;
+};
+const rowGroups = chunk((r) => rowPattern?.[r] ?? perRow);
+const rowGroupsMobile = chunk(() => Math.min(perRow, 2));
 
 // ライトボックス用の大きい画像
 const large = await Promise.all(
@@ -64,6 +79,18 @@ const og = cover ? await getImage({ src: cover.image, width: 1200, format: 'jpg'
           </ul>
         ))}
       </div>
+    ) : layout === 'rows' ? (
+      <>
+        {[['rows-desktop', rowGroups], ['rows-mobile', rowGroupsMobile]].map(([cls, groups]) => (
+          <div class={`photos rows ${cls}`}>
+            {(groups as typeof rowGroups).map((row) => (
+              <ul class="photo-row">
+                {row.map(({ photo, index }) => <PhotoItem photo={photo} index={index} title={title} layout={layout} />)}
+              </ul>
+            ))}
+          </div>
+        ))}
+      </>
     ) : (
       <ul class="photos stack">
         {photos.map((photo, index) => <PhotoItem photo={photo} index={index} title={title} layout={layout} />)}

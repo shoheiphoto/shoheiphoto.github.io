@@ -138,6 +138,18 @@ p { margin: 0; text-wrap: pretty; }
   .photos.grid { grid-template-columns: 1fr; }
   .photo-col { display: contents; }
 }
+.photos.rows { display: grid; gap: 10px; }
+.photo-row { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.photo-row li { flex: var(--ratio) 1 0; min-width: 0; }  /* 縦横比に応じて幅を配分 → 段の高さが揃う */
+/* PCで1枚だけの段の縦位置写真は、大きくなりすぎないよう高さを抑える */
+@media (min-width: 761px) { .photo-row li:only-child img.portrait { width: auto; max-height: 92vh; } }
+/* PC用とスマホ用（1段2枚）の段組みを画面幅で切り替える */
+.photos.rows-mobile { display: none; }
+@media (max-width: 760px) {
+  .photos.rows-desktop { display: none; }
+  .photos.rows-mobile { display: grid; gap: 8px; }
+  .rows-mobile .photo-row { gap: 8px; }
+}
 .photos button { all: unset; display: block; width: 100%; cursor: zoom-in; }
 .photos img { width: 100%; margin-inline: auto; }
 /* 縦位置の写真は大きくなりすぎないよう高さを抑える */
