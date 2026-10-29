@@ -131,9 +131,13 @@ p { margin: 0; text-wrap: pretty; }
 .work-body > * + * { margin-top: 1em; }
 
 .photos { display: grid; gap: clamp(16px, 3vw, 40px); margin: 0; padding: 0; list-style: none; }
-.photos.grid { display: block; columns: 2; column-gap: 12px; }   /* 縦横混在でも隙間なく並ぶ（石垣状） */
-.photos.grid li { break-inside: avoid; margin-bottom: 12px; }
-@media (max-width: 760px) { .photos.grid { columns: 1; } }
+.photos.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.photo-col { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+/* スマホでは1列に戻し、ファイル名順（style の order）で並べ直す */
+@media (max-width: 760px) {
+  .photos.grid { grid-template-columns: 1fr; }
+  .photo-col { display: contents; }
+}
 .photos button { all: unset; display: block; width: 100%; cursor: zoom-in; }
 .photos img { width: 100%; margin-inline: auto; }
 /* 縦位置の写真は大きくなりすぎないよう高さを抑える */

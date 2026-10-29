@@ -1,0 +1,25 @@
+---
+import { Image } from 'astro:assets';
+import type { Photo } from '../lib/works';
+
+interface Props {
+  photo: Photo;
+  index: number;
+  title: string;
+  layout: 'stack' | 'grid';
+}
+const { photo, index, title, layout } = Astro.props;
+const isPortrait = photo.image.height > photo.image.width;
+---
+<li class="fade" style={`order:${index}`}>
+  <button type="button" data-index={index} aria-label={`${index + 1}枚目を拡大表示`}>
+    <Image
+      src={photo.image}
+      alt={`${title}（${index + 1}）`}
+      widths={[640, 1080, 1600, 2000]}
+      sizes={layout === 'grid' ? '(max-width: 760px) 100vw, 600px' : '(max-width: 1200px) 100vw, 1200px'}
+      class={isPortrait ? 'portrait' : 'landscape'}
+      loading={index < 2 ? 'eager' : 'lazy'}
+    />
+  </button>
+</li>

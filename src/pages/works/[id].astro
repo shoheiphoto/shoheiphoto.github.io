@@ -1,9 +1,10 @@
 ---
-import { Image, getImage } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import WorkGrid from '../../components/WorkGrid.astro';
-import { getWorks, photosOf, coverOf } from '../../lib/works';
+import PhotoItem from '../../components/PhotoItem.astro';
+import { getWorks, photosOf, coverOf, type Photo } from '../../lib/works';
 
 export async function getStaticPaths() {
   const works = await getWorks();
@@ -22,6 +23,16 @@ const { work, prev, next, related } = Astro.props;
 const { Content } = await render(work);
 const { title, date, summary, links, layout } = work.data;
 const photos = photosOf(work.id);
+
+// 2列表示：ファイル名順に、その時点で短いほうの列へ1枚ずつ振り分ける
+// → 01が左・02が右…と左右交互に近い順で並び、縦横混在でも段差が出にくい
+const columns: { photo: Photo; index: number }[][] = [[], []];
+const heights = [0, 0];
+photos.forEach((photo, index) => {
+  const c = heights[0] <= heights[1] ? 0 : 1;
+  columns[c].push({ photo, index });
+  heights[c] += photo.image.height / photo.image.width;
+});
 
 // ライトボックス用の大きい画像
 const large = await Promise.all(
@@ -45,22 +56,19 @@ const og = cover ? await getImage({ src: cover.image, width: 1200, format: 'jpg'
 
     {work.body?.trim() && <div class="work-body"><Content /></div>}
 
-    <ul class={`photos ${layout}`}>
-      {photos.map((p, i) => (
-        <li class="fade">
-          <button type="button" data-index={i} aria-label={`${i + 1}枚目を拡大表示`}>
-            <Image
-              src={p.image}
-              alt={`${title}（${i + 1}）`}
-              widths={[640, 1080, 1600, 2000]}
-              sizes={layout === 'grid' ? '(max-width: 760px) 100vw, 600px' : '(max-width: 1200px) 100vw, 1200px'}
-              class={p.image.height > p.image.width ? 'portrait' : 'landscape'}
-              loading={i < 2 ? 'eager' : 'lazy'}
-            />
-          </button>
-        </li>
-      ))}
-    </ul>
+    {layout === 'grid' ? (
+      <div class="photos grid">
+        {columns.map((col) => (
+          <ul class="photo-col">
+            {col.map(({ photo, index }) => <PhotoItem photo={photo} index={index} title={title} layout={layout} />)}
+          </ul>
+        ))}
+      </div>
+    ) : (
+      <ul class="photos stack">
+        {photos.map((photo, index) => <PhotoItem photo={photo} index={index} title={title} layout={layout} />)}
+      </ul>
+    )}
   </article>
 
   <nav class="pager" aria-label="前後の作品">
@@ -93,7 +101,7 @@ const og = cover ? await getImage({ src: cover.image, width: 1200, format: 'jpg'
   const show = (i: number) => {
     cur = (i + srcs.length) % srcs.length;
     img.src = srcs[cur];
-    img.alt = document.querySelectorAll('.photos img')[cur]?.getAttribute('alt') ?? '';
+    img.alt = document.querySelector(`.photos button[data-index="${cur}"] img`)?.getAttribute('alt') ?? '';
     count.textContent = `${cur + 1} / ${srcs.length}`;
   };
 
