@@ -1,0 +1,121 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import WorkGrid from '../../components/WorkGrid.astro';
+import { getWorks, photosOf, coverOf } from '../../lib/works';
+
+export async function getStaticPaths() {
+  const works = await getWorks();
+  return works.map((work, i) => ({
+    params: { id: work.id },
+    props: {
+      work,
+      prev: works[i - 1],             // 一覧で1つ前（新しい作品）
+      next: works[i + 1],             // 一覧で1つ後（古い作品）
+      related: [...works.slice(i + 1), ...works.slice(0, i)].slice(0, 3),
+    },
+  }));
+}
+
+const { work, prev, next, related } = Astro.props;
+const { Content } = await render(work);
+const { title, date, summary, links, layout } = work.data;
+const photos = photosOf(work.id);
+
+// ライトボックス用の大きい画像
+const large = await Promise.all(
+  photos.map((p) => getImage({ src: p.image, width: Math.min(2400, p.image.width), format: 'webp' })),
+);
+const cover = coverOf(work);
+const og = cover ? await getImage({ src: cover.image, width: 1200, format: 'jpg' }) : undefined;
+---
+<Base title={title} description={summary} ogImage={og?.src}>
+  <article class="work">
+    <header class="work-head">
+      <h1>{title}</h1>
+      <time datetime={date.toISOString()}>{date.getFullYear()}</time>
+      {summary && <p class="summary">{summary}</p>}
+      {links.length > 0 && (
+        <p class="links">
+          {links.map((l) => <a href={l.url} target="_blank" rel="noopener">{l.label} ↗</a>)}
+        </p>
+      )}
+    </header>
+
+    {work.body?.trim() && <div class="work-body"><Content /></div>}
+
+    <ul class={`photos ${layout}`}>
+      {photos.map((p, i) => (
+        <li class="fade">
+          <button type="button" data-index={i} aria-label={`${i + 1}枚目を拡大表示`}>
+            <Image
+              src={p.image}
+              alt={`${title}（${i + 1}）`}
+              widths={[640, 1080, 1600, 2000]}
+              sizes={layout === 'grid' ? '(max-width: 760px) 100vw, 600px' : '(max-width: 1200px) 100vw, 1200px'}
+              class={p.image.height > p.image.width ? 'portrait' : 'landscape'}
+              loading={i < 2 ? 'eager' : 'lazy'}
+            />
+          </button>
+        </li>
+      ))}
+    </ul>
+  </article>
+
+  <nav class="pager" aria-label="前後の作品">
+    <div>{prev && <a href={`/works/${prev.id}/`}><small>← PREV</small>{prev.data.title}</a>}</div>
+    <div class="next">{next && <a href={`/works/${next.id}/`}><small>NEXT →</small>{next.data.title}</a>}</div>
+  </nav>
+
+  <section class="related">
+    <h2>YOU MAY ALSO LIKE</h2>
+    <WorkGrid works={related} />
+  </section>
+
+  <dialog class="lightbox" aria-label="写真の拡大表示">
+    <img alt="" />
+    <button class="close" aria-label="閉じる">×</button>
+    <button class="prev" aria-label="前の写真">‹</button>
+    <button class="next" aria-label="次の写真">›</button>
+    <p class="count"></p>
+  </dialog>
+  <script is:inline type="application/json" id="lightbox-data" set:html={JSON.stringify(large.map((l) => l.src))} />
+</Base>
+
+<script>
+  const srcs: string[] = JSON.parse(document.getElementById('lightbox-data')!.textContent!);
+  const dlg = document.querySelector<HTMLDialogElement>('.lightbox')!;
+  const img = dlg.querySelector('img')!;
+  const count = dlg.querySelector('.count')!;
+  let cur = 0;
+
+  const show = (i: number) => {
+    cur = (i + srcs.length) % srcs.length;
+    img.src = srcs[cur];
+    img.alt = document.querySelectorAll('.photos img')[cur]?.getAttribute('alt') ?? '';
+    count.textContent = `${cur + 1} / ${srcs.length}`;
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.photos button').forEach((b) =>
+    b.addEventListener('click', () => { show(Number(b.dataset.index)); dlg.showModal(); }),
+  );
+  dlg.querySelector('.close')!.addEventListener('click', () => dlg.close());
+  dlg.querySelector('.prev')!.addEventListener('click', () => show(cur - 1));
+  dlg.querySelector('.next')!.addEventListener('click', () => show(cur + 1));
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(cur - 1);
+    if (e.key === 'ArrowRight') show(cur + 1);
+  });
+
+  // スマホ：左右スワイプで送る
+  let x0: number | null = null;
+  dlg.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  dlg.addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+</script>

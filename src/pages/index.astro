@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import WorkGrid from '../components/WorkGrid.astro';
+import { getWorks } from '../lib/works';
+import { site } from '../site.config';
+
+const works = await getWorks();
+---
+<Base>
+  <section class="hero">
+    <h1>{site.author}</h1>
+    <p>{site.tagline}</p>
+  </section>
+  <WorkGrid works={works} />
+</Base>

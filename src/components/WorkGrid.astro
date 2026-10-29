@@ -1,0 +1,36 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { coverOf } from '../lib/works';
+
+interface Props {
+  works: CollectionEntry<'works'>[];
+}
+const { works } = Astro.props;
+---
+<ul class="works-grid">
+  {works.map((work, i) => {
+    const cover = coverOf(work);
+    return (
+      <li class="work-card fade" style={`animation-delay:${Math.min(i, 8) * 60}ms`}>
+        <a href={`/works/${work.id}/`}>
+          <div class="thumb">
+            {cover && (
+              <Image
+                src={cover.image}
+                alt={work.data.title}
+                widths={[480, 800, 1200]}
+                sizes="(max-width: 1000px) 50vw, 400px"
+                loading={i < 6 ? 'eager' : 'lazy'}
+              />
+            )}
+          </div>
+          <div class="meta">
+            <h2>{work.data.title}</h2>
+            <time datetime={work.data.date.toISOString()}>{work.data.date.getFullYear()}</time>
+          </div>
+        </a>
+      </li>
+    );
+  })}
+</ul>

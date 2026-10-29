@@ -1,0 +1,58 @@
+---
+import { site } from '../site.config';
+
+const nav = [
+  { href: '/', label: 'Photo' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href === '/' ? path === '/' || path.startsWith('/works/') : path.startsWith(href);
+---
+<header class="site-header" id="top">
+  <nav class="site-nav" aria-label="メインメニュー">
+    <ul>
+      {nav.map((item) => (
+        <li><a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+
+  <a href="/" class="site-logo">{site.name}</a>
+
+  <div class="site-social">
+    <a href={site.instagram} target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
+    </a>
+    <a href={`mailto:${site.email}`} aria-label="メール">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 6.5 12 13l8.5-6.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="メニューを開く">
+    <span></span><span></span>
+  </button>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <ul>
+      {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+    </ul>
+    <p class="mobile-social">
+      <a href={site.instagram} target="_blank" rel="noopener">Instagram</a>
+      <a href={`mailto:${site.email}`}>Mail</a>
+    </p>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-toggle')!;
+  const menu = document.getElementById('mobile-menu')!;
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+    menu.hidden = !open;
+    document.body.classList.toggle('menu-open', open);
+  });
+</script>

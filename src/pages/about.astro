@@ -1,0 +1,41 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import profile from '../assets/profile.jpg';
+import { site } from '../site.config';
+---
+<Base title="About">
+  <div class="page">
+    <h1>About</h1>
+    <div class="about">
+      <figure>
+        <Image src={profile} alt={`${site.author}のポートレート`} widths={[320, 640]} sizes="320px" />
+        <figcaption>photo by Yumi Sasaki (Atelier Holiday)</figcaption>
+      </figure>
+
+      <div class="prose">
+        <div>
+          <h2 class="name">{site.author}<span style="font-weight:400;font-size:14px;margin-left:.8em">安部 翔平</span></h2>
+          <p class="roles">Photographer / Musician / Programmer / DTP / Editor</p>
+        </div>
+
+        <p>1986年生まれ、京都府出身。</p>
+        <p>大学在学中はフォークソング同好会でバンド活動をするかたわら、写真研究会でフィルムカメラによるモノクロ写真の撮影に没頭。現像・プリントのために暗室にこもる日々を送る。</p>
+        <p>フォトグラファーのほか、プログラマを生業とし、執筆活動、音楽活動も行っている。</p>
+
+        <h3>所属バンド</h3>
+        <p>シュウタネギと愉快なクルー／星のクズさまたち／nekosogi／後日改メ</p>
+
+        <h3>使用カメラ</h3>
+        <p>Nikon D810、Nikon FE2、Fujifilm NATURA CLASSICA</p>
+
+        <h3>趣味</h3>
+        <p>楽器演奏、写真撮影、読書、映画鑑賞、サイクリング、軽めの登山、酒場放浪</p>
+
+        <p style="margin-top:2.4em">出張撮影、お見積もりなどお気軽に<a href="/contact/" style="border-bottom:1px solid">お問い合わせ</a>ください。各SNSのDMでも受け付けています。</p>
+
+        <p class="note">本サイトで公開している写真は、安部翔平の作品紹介を目的としています。著作権・肖像権等で不都合がございましたら、変更・削除いたしますのでご連絡ください。掲載している画像・文章の無断転載・複製を禁じます。</p>
+      </div>
+    </div>
+  </div>
+</Base>
