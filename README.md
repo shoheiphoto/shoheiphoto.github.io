@@ -21,7 +21,7 @@ npm run build    # dist/ に公開用ファイルを書き出し
 
 1. `src/content/works/` に作品用のフォルダを作る（フォルダ名がURLになる。半角英数字とハイフン推奨）
 2. その中に写真（jpg / png / webp）を入れる。**ファイル名順**に表示される（`01.jpg`, `02.jpg` …）
-3. 同じフォルダに `index.md` を作る
+3. 同じフォルダに `index.md` を作る（`templates/index.md` をコピーして書き換えると簡単。各項目の説明もそこに書いてあります）
 
 ```markdown
 ---
