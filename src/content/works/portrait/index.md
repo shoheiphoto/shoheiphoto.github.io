@@ -1,6 +1,9 @@
 ---
 title: "Portrait"
-date: 2024-02-01
-tags: [portrait]
-summary: "ポートレート作品。"
+date: 2021-10-24
+summary: "依頼撮影：ポートフォリオサイト掲載用のポートレート撮影。"
+tags: [portrait, kyoto]
+cover: 06.jpg        # 元ファイル DSC_3206.jpg
+layout: rows
+perRow: 3
 ---
