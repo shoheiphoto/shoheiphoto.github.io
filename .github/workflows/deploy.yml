@@ -1,0 +1,40 @@
+# main ブランチに push すると、自動でビルドして GitHub Pages に公開する
+# 参考: https://github.com/withastro/action
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # GitHub の Actions タブから手動でも実行できる
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 連続で push したときは、古い公開処理を待たずに最新だけ公開する
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install, build, and upload
+        uses: withastro/action@v6
+        with:
+          node-version: 22
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
