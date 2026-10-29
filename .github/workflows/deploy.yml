@@ -3,9 +3,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch: # GitHub の Actions タブから手動でも実行できる
+  # 本公開までは自動公開を止めておく。本公開するときに下の3行のコメントを外す
+  # push:
+  #   branches: [main]
+  workflow_dispatch: # GitHub の Actions タブから手動で実行したときだけ公開する
 
 permissions:
   contents: read
